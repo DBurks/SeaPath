@@ -19,26 +19,6 @@ jobs:
         - name: checkout code
           uses: actions/checkout@v3
 
-        - name: Install Dependencies (Linux)
-          if: runner.os == 'Linux'
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y libgtest-dev
-            cd /usr/src/gtest
-            sudo cmake .
-            sudo make
-            sudo make install
-
-        - name: Setup Environment (MacOS)
-          if: runner.os == 'macOS'
-          run: |
-            brew install googletest
-
-        - name: Setup Environment (Windows)
-          if: runner.os == 'Windows'
-          run: |
-            choco install googletest.portable
-
         - name: Create Build Directory
           run: mkdir build
 
