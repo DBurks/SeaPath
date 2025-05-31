@@ -29,12 +29,12 @@ jobs:
             sudo make install
 
         - name: Setup Environment (MacOS)
-          if: runner.os == "macOS"
+          if: runner.os == 'macOS'
           run: |
             brew install googletest
 
         - name: Setup Environment (Windows)
-          if: runner.os == "Windows"
+          if: runner.os == 'Windows'
           run: |
             choco install googletest
 
