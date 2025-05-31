@@ -37,7 +37,7 @@ jobs:
         - name: Setup Environment (Windows)
           if: runner.os == 'Windows'
           run: |
-            choco install googletest
+            choco install googletest.portable
 
         - name: Create Build Directory
           run: mkdir build
