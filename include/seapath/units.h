@@ -24,7 +24,15 @@ struct Distance
           meters(nm*1852.0) {}
 };
 
+struct Speed
+{
+  double knots;
+  double meters_per_second;
 
+  explicit Speed(double kts)
+      : knots(kts), 
+        meters_per_second(kts * 0.5144444444) {}
+};
 
 } // namespace units
 } //namespace seapath
