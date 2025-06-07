@@ -64,3 +64,47 @@ TEST_F(LatLonTest, InternalAngleObjectsAreCorrect) {
     ASSERT_NEAR(point_neg_180.latitude.radians, 0.0, 1e-9);
     ASSERT_NEAR(point_neg_180.longitude.radians, -M_PI, 1e-9); // -180 deg = -PI rad
 }
+
+class EllipsoidTest : public ::testing::Test
+{
+protected:
+    void SetUp() {
+
+    }
+    void TearDown() {
+
+    }
+    const seapath::geodesy::Ellipsoid& wgs84 = 
+        seapath::geodesy::Ellipsoid::WGS84;
+};
+
+TEST_F(EllipsoidTest, WGSParametersAreCorrect) {
+    ASSERT_DOUBLE_EQ(wgs84.getEquatorialRadius(),  6378137.0);
+    double expected_semi_minor_axis = 6378137.0 * (1.0 - (1.0 / 298.257223563));
+    ASSERT_DOUBLE_EQ(wgs84.getPolarRadius(),  expected_semi_minor_axis);
+    double expected_mean_radius = (2 * 6378137.0 + expected_semi_minor_axis) / 3;
+    ASSERT_DOUBLE_EQ(wgs84.getMeanRadius(),  expected_mean_radius);
+    ASSERT_NEAR(wgs84.getFlattening(),  0.003352811, 1e-9);
+    ASSERT_DOUBLE_EQ(wgs84.inverse_flattening, 298.257223563);
+    ASSERT_NEAR(wgs84.getEccentricity(),  0.081819191, 1e-9);
+    ASSERT_NEAR(wgs84.getEccentricitySquared(),  0.006694380, 1e-9);
+}
+
+TEST_F(EllipsoidTest, CustomEllipsoidCalculations) {
+    // Example: A hypothetical perfect sphere (flattening = 0, inv_f = infinity)
+    // In practice, define a very large inverse_flattening for near-sphere.
+    // For a perfect sphere, semi_major_axis == semi_minor_axis.
+    seapath::geodesy::Ellipsoid sphere(6371000.0, std::numeric_limits<double>::infinity());
+    ASSERT_DOUBLE_EQ(sphere.semi_major_axis, 6371000.0);
+    ASSERT_DOUBLE_EQ(sphere.semi_minor_axis, 6371000.0);
+    ASSERT_DOUBLE_EQ(sphere.flattening, 0.0);
+    ASSERT_DOUBLE_EQ(sphere.eccentricity_squared, 0.0);
+
+    // Test a more exaggerated ellipsoid if needed
+    seapath::geodesy::Ellipsoid exaggerated(10000.0, 10.0); // Very flat
+    ASSERT_DOUBLE_EQ(exaggerated.semi_major_axis, 10000.0);
+    ASSERT_DOUBLE_EQ(exaggerated.inverse_flattening, 10.0);
+    ASSERT_NEAR(exaggerated.flattening, 0.1, 1e-12);
+    ASSERT_NEAR(exaggerated.semi_minor_axis, 9000.0, 1e-9);
+    ASSERT_NEAR(exaggerated.eccentricity_squared, 0.19, 1e-12); // 2*0.1 - 0.1*0.1 = 0.2 - 0.01 = 0.19
+}
