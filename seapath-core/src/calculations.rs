@@ -69,7 +69,7 @@ pub fn rhumb_line_navigation(p1: GeoPoint, p2: GeoPoint) -> (Distance, Angle) {
         phi1.cos()
     };
     let distance_meters =
-        (d_phi.powi(2) + (q * d_lam).powi(2)).sqrt() * Ellipsoid::WGS84.semi_major_axis;
+        (d_phi.powi(2) + (q * d_lam).powi(2)).sqrt() * Ellipsoid::WGS84.mean_radius();
 
     (
         Distance::from_meters(distance_meters),
@@ -135,5 +135,50 @@ mod tests {
         // 1 degree is roughly 111,120 meters
         let expected = 111120.0;
         assert!((dist.meters() - expected).abs() < 1000.0);
+    }
+
+    #[test]
+    fn test_great_circle_bearing_north() {
+        let p1 = GeoPoint::new(0.0, 0.0).unwrap();
+        let p2 = GeoPoint::new(1.0, 0.0).unwrap(); // Directly North
+        let bearing = great_circle_bearing(&p1, &p2);
+
+        // Bearing from (0,0) to (1,0) should be 0 degrees (North)
+        assert!((bearing.degrees() - 0.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_great_circle_bearing_east() {
+        let p1 = GeoPoint::new(0.0, 0.0).unwrap();
+        let p2 = GeoPoint::new(0.0, 1.0).unwrap(); // Directly East on Equator
+        let bearing = great_circle_bearing(&p1, &p2);
+
+        assert!((bearing.degrees() - 90.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_rhumb_line_navigation_north() {
+        let p1 = GeoPoint::new(0.0, 0.0).unwrap();
+        let p2 = GeoPoint::new(1.0, 0.0).unwrap();
+
+        let (dist, brng) = rhumb_line_navigation(p1, p2);
+
+        // 1 degree latitude using WGS84 mean radius is ~60.04 nm
+        assert!((dist.nautical_miles() - 60.04).abs() < 1e-2);
+        assert!((brng.degrees() - 0.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_dead_reckon_east() {
+        let start = GeoPoint::new(0.0, 0.0).unwrap();
+        let bearing = Angle::from_degrees(90.0);
+        let distance = Distance::from_nautical_miles(60.0);
+
+        // Matches signature: pub fn dead_reckon(start: GeoPoint, bearing: Angle, distance: Distance) -> GeoPoint
+        let end = dead_reckon(start, bearing, distance);
+
+        // At the equator, 60nm East is roughly 1 degree of longitude
+        assert!((end.lat() - 0.0).abs() < 1e-6);
+        assert!((end.lon() - 1.0).abs() < 0.1);
     }
 }

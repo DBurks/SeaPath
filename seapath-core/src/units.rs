@@ -61,3 +61,36 @@ impl Speed {
         self.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_angle_conversions() {
+        let a = Angle::from_degrees(180.0);
+        assert!((a.radians() - std::f64::consts::PI).abs() < 1e-10);
+
+        let b = Angle::from_radians(std::f64::consts::PI / 2.0);
+        assert!((b.degrees() - 90.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_distance_conversions() {
+        let d = Distance::from_nautical_miles(1.0);
+        assert_eq!(d.meters(), 1852.0);
+
+        let d2 = Distance::from_meters(1852.0);
+        assert_eq!(d2.nautical_miles(), 1.0);
+    }
+
+    #[test]
+    fn test_speed_conversions() {
+        let s = Speed::from_knots(1.0);
+        // Test internal m/s storage
+        assert!((s.mps() - KNOTS_TO_MPS).abs() < 1e-10);
+
+        // Test round-trip
+        assert!((s.knots() - 1.0).abs() < 1e-10);
+    }
+}

@@ -144,4 +144,35 @@ mod tests {
         // Check that we have moved forward (Along Track Distance)
         assert!(progress.atd.meters() > 0.0);
     }
+
+    #[test] // Added attribute so it actually runs
+    fn test_leg_progress_bearing_wrap() {
+        // Leg goes from (0,0) to (0,1) -> Desired Track is 90 degrees (PI/2)
+        let start = Waypoint::new("Start", 0.0, 0.0);
+        let end = Waypoint::new("End", 0.0, 1.0);
+        let leg = Leg::new(start, end);
+
+        // Case 1: Trigger angle_diff < -PI
+        // Target is 90 deg. If current position is "Southwest" (bearing ~280 deg),
+        // 90 - 280 = -190 degrees (which is < -PI).
+        // Using a point at Lat -0.1, Lon -0.1 gives a bearing of ~225 degrees.
+        // 90 - 225 = -135 (not enough).
+
+        // Let's use a point that results in a bearing of 350 degrees.
+        // 90 (Track) - 350 (To Current) = -260 degrees (< -PI)
+        let pos_wrap_pos = GeoPoint::new(0.1, -0.01).unwrap();
+        let progress_pos = leg.get_progress(&pos_wrap_pos);
+        assert!(progress_pos.atd.meters() != 0.0);
+
+        // Case 2: Trigger angle_diff > PI
+        // Target is 270 deg. Current is 10 deg.
+        // 270 - 10 = 260 degrees (> PI)
+        let start_2 = Waypoint::new("Start2", 0.0, 0.0);
+        let end_2 = Waypoint::new("End2", 0.0, -1.0); // Heading 270
+        let leg_2 = Leg::new(start_2, end_2);
+
+        let pos_wrap_neg = GeoPoint::new(0.1, 0.01).unwrap(); // Bearing ~10 deg
+        let progress_neg = leg_2.get_progress(&pos_wrap_neg);
+        assert!(progress_neg.atd.meters() != 0.0);
+    }
 }
