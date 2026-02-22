@@ -18,6 +18,10 @@ impl Angle {
     pub fn radians(&self) -> f64 {
         self.0.to_radians()
     }
+
+    pub fn from_radians(rad: f64) -> Self {
+        Self(rad.to_degrees())
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

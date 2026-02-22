@@ -1,10 +1,11 @@
-pub mod units;
-pub mod geodesy;
-pub mod state;
 pub mod calculations;
+pub mod geodesy;
+pub mod path_planning;
+pub mod state;
+pub mod units;
 
-pub use state::StateVector;
 pub use geodesy::GeoPoint;
+pub use state::StateVector;
 
 // A simple test to make sure your Windows setup is working
 #[cfg(test)]

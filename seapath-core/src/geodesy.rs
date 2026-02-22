@@ -25,6 +25,21 @@ impl GeoPoint {
     pub fn to_radians(&self) -> (f64, f64) {
         (self.lat.to_radians(), self.lon.to_radians())
     }
+
+    /// Calculates the "Mercator Latitude" (Meridional Parts).
+    /// This is the vertical coordinate on a flat Mercator map.
+    pub fn mercator_latitude(&self) -> f64 {
+        let lat_rad = self.lat.to_radians();
+
+        // Clamp latitude to +/- 89.5 degrees to avoid the infinity asymptote at the poles
+        let limit = 89.5f64.to_radians();
+        let clamped_lat = lat_rad.clamp(-limit, limit);
+
+        // The Bowditch formula: ln(tan(45° + φ/2))
+        (std::f64::consts::FRAC_PI_4 + (clamped_lat / 2.0))
+            .tan()
+            .ln()
+    }
 }
 
 pub struct Ellipsoid {
@@ -51,4 +66,3 @@ impl Ellipsoid {
         (2.0 * self.semi_major_axis + self.semi_minor_axis()) / 3.0
     }
 }
-

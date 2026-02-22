@@ -5,27 +5,27 @@ use crate::units::{Angle, Speed};
 pub struct StateVector {
     /// Microseconds since epoch (high precision for IMU integration)
     pub timestamp_us: u64,
-    
+
     /// The physical location of the vessel
     pub position: GeoPoint,
-    
+
     /// Magnetic or True North heading of the bow
     pub heading: Angle,
-    
+
     /// Speed Over Ground (usually from GPS)
     pub sog: Speed,
-    
+
     /// Course Over Ground (actual path over the seafloor)
     pub cog: Angle,
-    
+
     /// Attitude: Tilt along the longitudinal axis
     pub roll: Angle,
-    
+
     /// Attitude: Tilt along the lateral axis
     pub pitch: Angle,
-    
+
     /// Rate of turn (Degrees per second) - Critical for Kalman Filters
-    pub yaw_rate: f32, 
+    pub yaw_rate: f32,
 }
 
 impl StateVector {
@@ -52,11 +52,7 @@ impl StateVector {
         let distance = crate::units::Distance::from_meters(dist_meters);
 
         // 2. Calculate new position using the formula in calculations.rs
-        let new_pos = crate::calculations::dead_reckon(
-            self.position, 
-            self.heading, 
-            distance
-        );
+        let new_pos = crate::calculations::dead_reckon(self.position, self.heading, distance);
 
         // 3. Update the state
         self.position = new_pos;
