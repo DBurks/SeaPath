@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "seapath-core",
+    "seapath-runner",
+]
+resolver = "2"

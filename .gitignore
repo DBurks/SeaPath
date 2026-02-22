@@ -1,0 +1,22 @@
+# --- Rust Specific ---
+/target/
+
+# --- IDEs and Editors ---
+.vscode/
+.idea/
+*.iml
+
+# --- Backup and Temporary Files ---
+*.swp
+*.bak
+*~
+.DS_Store
+Thumbs.db
+
+# --- Cargo/Lock Files ---
+# (Uncomment the line below only if you want to ignore the lockfile)
+# Cargo.lock
+
+# --- Environment and Logs ---
+.env
+*.log
