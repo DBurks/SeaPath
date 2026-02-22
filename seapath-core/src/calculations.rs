@@ -181,4 +181,18 @@ mod tests {
         assert!((end.lat() - 0.0).abs() < 1e-6);
         assert!((end.lon() - 1.0).abs() < 0.1);
     }
+
+    #[test]
+    fn test_rhumb_line_dateline_crossing() {
+        // From 179 East to 179 West
+        let p1 = GeoPoint::new(0.0, 179.0).unwrap();
+        let p2 = GeoPoint::new(0.0, -179.0).unwrap();
+
+        let (dist, brng) = rhumb_line_navigation(p1, p2);
+
+        // Bearing should be 90 degrees (East)
+        assert!((brng.degrees() - 90.0).abs() < 1e-6);
+        // Distance should be 2 degrees (approx 120nm)
+        assert!((dist.nautical_miles() - 120.08).abs() < 0.1);
+    }
 }

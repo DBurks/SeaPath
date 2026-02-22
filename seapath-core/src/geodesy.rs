@@ -96,4 +96,22 @@ mod tests {
         // WGS84 mean radius is approximately 6,371,008 meters
         assert!((radius - 6371008.0).abs() < 1.0);
     }
+
+    #[test]
+    fn test_geopoint_methods() {
+        let p = GeoPoint::new(45.0, 90.0).unwrap();
+        assert_eq!(p.lat(), 45.0);
+        assert_eq!(p.lon(), 90.0);
+
+        let (lat_rad, _lon_rad) = p.to_radians();
+        assert!((lat_rad - std::f64::consts::FRAC_PI_4).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_ellipsoid_constants() {
+        let wgs84 = Ellipsoid::WGS84;
+        assert_eq!(wgs84.semi_major_axis, 6378137.0);
+        // Ensure mean_radius() is working
+        assert!(wgs84.mean_radius() > 6371000.0);
+    }
 }

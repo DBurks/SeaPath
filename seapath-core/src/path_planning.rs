@@ -175,4 +175,23 @@ mod tests {
         let progress_neg = leg_2.get_progress(&pos_wrap_neg);
         assert!(progress_neg.atd.meters() != 0.0);
     }
+
+    #[test]
+    fn test_route_and_leg_generation() {
+        let mut route = Route::new("Test Route");
+        route.add_waypoint(Waypoint::new("WP1", 0.0, 0.0));
+        route.add_waypoint(Waypoint::new("WP2", 1.0, 0.0));
+        route.add_waypoint(Waypoint::new("WP3", 2.0, 0.0));
+
+        assert_eq!(route.waypoints.len(), 3);
+
+        // Test valid leg generation
+        let leg_1 = route.get_leg(0).unwrap();
+        assert_eq!(leg_1.start.lat(), 0.0);
+        assert_eq!(leg_1.end.lat(), 1.0);
+
+        // Test out of bounds leg generation
+        let no_leg = route.get_leg(2);
+        assert!(no_leg.is_none());
+    }
 }
