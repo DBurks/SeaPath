@@ -195,4 +195,48 @@ mod tests {
         // Distance should be 2 degrees (approx 120nm)
         assert!((dist.nautical_miles() - 120.08).abs() < 0.1);
     }
+
+    #[test]
+    fn test_rhumb_line_date_line_branches() {
+        // Branch 1: d_lam > 0.0 (e.g., 170 to -170)
+        // d_lam = -170 - 170 = -340 degrees (in radians, this is < -PI)
+        // Wait, to trigger the 'd_lam > 0' branch inside the abs() check:
+        // If p1 is -170 and p2 is 170, d_lam is 340 ( > PI)
+        let p1_east = GeoPoint::new(0.0, -170.0).unwrap();
+        let p2_east = GeoPoint::new(0.0, 170.0).unwrap();
+        let _ = rhumb_line_navigation(p1_east, p2_east);
+
+        // Branch 2: d_lam <= 0.0 (e.g., 170 to -170)
+        // d_lam = -170 - 170 = -340 (abs is > PI, but d_lam is negative)
+        let p1_west = GeoPoint::new(0.0, 170.0).unwrap();
+        let p2_west = GeoPoint::new(0.0, -170.0).unwrap();
+        let _ = rhumb_line_navigation(p1_west, p2_west);
+    }
+
+    #[test]
+    fn test_rhumb_line_wraps() {
+        // Case 1: d_lam > PI (Positive wrap)
+        // Going East from 170° to -170° (340° jump)
+        let p1 = GeoPoint::new(0.0, 170.0).unwrap();
+        let p2 = GeoPoint::new(0.0, -170.0).unwrap();
+
+        let (_, brng_nav) = rhumb_line_navigation(p1, p2);
+        let brng_calc = rhumb_line_bearing(&p1, &p2);
+
+        // Should wrap to the "short way" (East/90°)
+        assert!((brng_nav.degrees() - 90.0).abs() < 1e-6);
+        assert!((brng_calc.degrees() - 90.0).abs() < 1e-6);
+
+        // Case 2: d_lam < -PI (Negative wrap)
+        // Going West from -170° to 170° (-340° jump)
+        let p3 = GeoPoint::new(0.0, -170.0).unwrap();
+        let p4 = GeoPoint::new(0.0, 170.0).unwrap();
+
+        let (_, brng_nav_west) = rhumb_line_navigation(p3, p4);
+        let brng_calc_west = rhumb_line_bearing(&p3, &p4);
+
+        // Should wrap to the "short way" (West/270°)
+        assert!((brng_nav_west.degrees() - 270.0).abs() < 1e-6);
+        assert!((brng_calc_west.degrees() - 270.0).abs() < 1e-6);
+    }
 }

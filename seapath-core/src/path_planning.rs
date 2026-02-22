@@ -194,4 +194,19 @@ mod tests {
         let no_leg = route.get_leg(2);
         assert!(no_leg.is_none());
     }
+
+    #[test]
+    fn test_get_progress_angle_wraps() {
+        let start = Waypoint::new("A", 0.0, 0.0);
+        let end = Waypoint::new("B", 1.0, 0.0); // Track is 000 (North)
+        let leg = Leg::new(start, end);
+
+        // Force angle_diff > PI: Vessel is far to the "Right" of the track
+        let pos_right = GeoPoint::new(0.0, 0.1).unwrap();
+        let _ = leg.get_progress(&pos_right);
+
+        // Force angle_diff < -PI: Vessel is far to the "Left" of the track
+        let pos_left = GeoPoint::new(0.0, -0.1).unwrap();
+        let _ = leg.get_progress(&pos_left);
+    }
 }

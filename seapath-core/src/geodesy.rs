@@ -114,4 +114,12 @@ mod tests {
         // Ensure mean_radius() is working
         assert!(wgs84.mean_radius() > 6371000.0);
     }
+
+    #[test]
+    fn test_geopoint_invalid_longitude() {
+        // Triggers the second 'if' block in GeoPoint::new
+        let result = GeoPoint::new(0.0, 181.0);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Longitude"));
+    }
 }
