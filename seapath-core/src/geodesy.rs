@@ -1,5 +1,4 @@
 // seapath-core/src/geodesy.rs
-use std::f64::consts::PI;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GeoPoint {
@@ -9,7 +8,12 @@ pub struct GeoPoint {
 
 impl GeoPoint {
     pub fn new(lat: f64, lon: f64) -> Result<Self, String> {
-        // ... (validation logic stays the same)
+        if !(-90.0..=90.0).contains(&lat) {
+            return Err(format!("Latitude {} is out of range (-90 to 90)", lat));
+        }
+        if !(-180.0..=180.0).contains(&lon) {
+            return Err(format!("Longitude {} is out of range (-180 to 180)", lon));
+        }
         Ok(Self { lat, lon })
     }
 
@@ -64,5 +68,32 @@ impl Ellipsoid {
     // Add 'pub' here!
     pub fn mean_radius(&self) -> f64 {
         (2.0 * self.semi_major_axis + self.semi_minor_axis()) / 3.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_geopoint_creation() {
+        let point = GeoPoint::new(45.0, -75.0);
+        assert!(point.is_ok());
+        let p = point.unwrap();
+        assert_eq!(p.lat(), 45.0);
+        assert_eq!(p.lon(), -75.0);
+    }
+
+    #[test]
+    fn test_invalid_geopoint() {
+        let point = GeoPoint::new(95.0, 0.0);
+        assert!(point.is_err());
+    }
+
+    #[test]
+    fn test_mean_radius_wgs84() {
+        let radius = Ellipsoid::WGS84.mean_radius();
+        // WGS84 mean radius is approximately 6,371,008 meters
+        assert!((radius - 6371008.0).abs() < 1.0);
     }
 }

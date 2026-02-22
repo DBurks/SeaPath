@@ -100,3 +100,48 @@ impl Route {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::geodesy::GeoPoint;
+
+    #[test]
+    fn test_leg_progress_start() {
+        let start = Waypoint {
+            name: "Start".to_string(),
+            location: GeoPoint::new(0.0, 0.0).unwrap(),
+        };
+        let end = Waypoint {
+            name: "End".to_string(),
+            location: GeoPoint::new(1.0, 0.0).unwrap(),
+        };
+        let leg = Leg::new(start, end);
+
+        let current_pos = GeoPoint::new(0.0, 0.0).unwrap();
+        let progress = leg.get_progress(&current_pos);
+
+        // Using the actual fields: xte, atd, dtg
+        assert!(progress.dtg.meters() > 0.0);
+        assert!((progress.xte.meters()).abs() < 1.0);
+    }
+
+    #[test]
+    fn test_leg_progress_midway() {
+        let start = Waypoint {
+            name: "A".to_string(),
+            location: GeoPoint::new(0.0, 0.0).unwrap(),
+        };
+        let end = Waypoint {
+            name: "B".to_string(),
+            location: GeoPoint::new(1.0, 0.0).unwrap(),
+        };
+        let leg = Leg::new(start, end);
+
+        let midway_pos = GeoPoint::new(0.5, 0.0).unwrap();
+        let progress = leg.get_progress(&midway_pos);
+
+        // Check that we have moved forward (Along Track Distance)
+        assert!(progress.atd.meters() > 0.0);
+    }
+}

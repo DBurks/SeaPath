@@ -1,0 +1,38 @@
+name: Rust CI
+
+on:
+  push:
+    branches: 
+      - main
+      - 'feature/*'
+  pull_request:
+    branches: 
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test and Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Tarpaulin
+        run: cargo install cargo-tarpaulin
+
+      - name: Run Tests
+        run: cargo test --all-features
+
+      - name: Generate Coverage Report
+        run: cargo tarpaulin --verbose --workspace --timeout 120 --out Lcov
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false # Set to true once you have your Codecov token set up
+          token: ${{ secrets.CODECOV_TOKEN }}

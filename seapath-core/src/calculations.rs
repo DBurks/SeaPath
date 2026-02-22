@@ -111,3 +111,29 @@ pub fn rhumb_line_bearing(start: &GeoPoint, end: &GeoPoint) -> Angle {
 
     Angle::from_radians(bearing_rad)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::geodesy::GeoPoint;
+
+    #[test]
+    fn test_rhumb_line_bearing_north() {
+        // We unwrap() here because these are hardcoded valid points for the test
+        let p1 = GeoPoint::new(0.0, 0.0).unwrap();
+        let p2 = GeoPoint::new(10.0, 0.0).unwrap();
+        let bearing = rhumb_line_bearing(&p1, &p2);
+        assert!((bearing.degrees() - 0.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_great_circle_equator() {
+        let p1 = GeoPoint::new(0.0, 0.0).unwrap();
+        let p2 = GeoPoint::new(0.0, 1.0).unwrap();
+        let dist = great_circle_distance(p1, p2);
+
+        // 1 degree is roughly 111,120 meters
+        let expected = 111120.0;
+        assert!((dist.meters() - expected).abs() < 1000.0);
+    }
+}

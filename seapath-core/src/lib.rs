@@ -14,7 +14,8 @@ mod tests {
 
     #[test]
     fn test_knot_conversion() {
-        let mps = knots_to_ms(1.0);
-        assert!((mps - 0.514444).abs() < 1e-6);
+        // Updated to use the Speed struct from units.rs
+        let mps = Speed::from_knots(1.0).mps();
+        assert!((mps - 0.5144444444).abs() < 1e-6);
     }
 }
