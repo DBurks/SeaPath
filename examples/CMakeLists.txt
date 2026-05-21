@@ -1,9 +1,10 @@
-set(SEAPATH_EXAMPLE_SRCS
-    basic_usage.cpp)
+# Define the example executable
+add_executable(seapath_basic_example basic_usage.cpp)
 
-add_executable(seapath_basic_example ${SEAPATH_EXAMPLE_SRCS})
+# Link against our shared library target
+target_link_libraries(seapath_basic_example PRIVATE seapath_lib)
 
-target_link_libraries(
-    seapath_basic_example PRIVATE
-    seapath
+# Crucial Step: Tell the example where to find the include directory
+target_include_directories(seapath_basic_example PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )

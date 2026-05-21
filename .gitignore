@@ -1074,3 +1074,6 @@ I have some suggestions to make this even better!
 *.dis
 # C/C++ binary extension file
 *.bin
+build_arm/
+build_coverage/
+seapath_source.tar.gz

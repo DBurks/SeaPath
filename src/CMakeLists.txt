@@ -1,28 +1,36 @@
-# define the source files for this project
-
-set(SEAPATH_LIB_SRCS
+# =================================================================
+# 1. Existing Shared Library Configuration (Preserved)
+# =================================================================
+add_library(seapath_lib SHARED 
+    calculations.cpp 
+    geodesy.cpp 
     units.cpp
-    geodesy.cpp
-    calculations.cpp)
+)
 
-# add SeaPAth Library target
-add_library(seapath SHARED ${SEAPATH_LIB_SRCS})
+# Set up include paths so consumers can find public headers
+target_include_directories(seapath_lib PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    $<INSTALL_INTERFACE:include>
+)
 
-target_include_directories(seapath PUBLIC 
-        $<INSTALL_INTERFACE:${SEAPATH_INCLUDE_INSTALL_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+# Add an alias to match your build setup if needed by tests/examples
+add_library(SeaPath::seapath_lib ALIAS seapath_lib)
 
-target_compile_definitions(seapath PRIVATE SEAPATH_EXPORTS)
+# =================================================================
+# 2. Real-Time Daemon Configuration (New)
+# =================================================================
+# Define our real-time simulation executive node executable
+add_executable(seapath_rt_node 
+    main.cpp
+)
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../include/seapath/
-        DESTINATION ${SEAPATH_INCLUDE_INSTALL_DIR})
-install(TARGETS seapath EXPORT SeaPathTargets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})  
+# Link both your math library and the OS system threading engine
+target_link_libraries(seapath_rt_node PRIVATE 
+    seapath_lib 
+    Threads::Threads
+)
 
-install(EXPORT SeaPathTargets
-        FILE SeaPathTargets.cmake
-        NAMESPACE seapath::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/seapath)
-
+# Ensure the executable can locate the executive header files cleanly
+target_include_directories(seapath_rt_node PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+)
