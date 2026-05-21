@@ -42,8 +42,11 @@ jobs:
       - name: Build
         run: cd build && cmake --build . --config ${{ matrix.build_type }}
 
+      # Changed: Run from 'build' root directory so ctest resolves paths correctly across OS platforms
       - name: Run Tests
-        run: cd build/tests && ctest -C ${{ matrix.build_type }}
+        run: |
+          cd build
+          ctest --output-on-failure -C ${{ matrix.build_type }}
 
       # Process and extract lcov metrics safely, ignoring GTest macro quirks
       - name: Generate and Filter Coverage Report (Ubuntu Debug only)
