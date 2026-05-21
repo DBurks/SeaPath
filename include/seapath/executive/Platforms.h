@@ -6,6 +6,7 @@
 
 namespace seapath::executive {
 
+#ifndef __APPLE__
 // Target Backend 1: Physical BeagleBone Black (Requires PREEMPT_RT or standard POSIX priorities)
 class PhysicalBBBPlatform {
 public:
@@ -25,6 +26,7 @@ public:
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);
     }
 };
+#endif
 
 // Target Backend 2: Host Emulator Platform (WSL Sandbox)
 class HostEmulatorPlatform {
