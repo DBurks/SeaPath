@@ -1,26 +1,11 @@
 # =================================================================
-# 1. Core Library Configuration (Conditional for Coverage)
+# 1. Existing Shared Library Configuration (Preserved)
 # =================================================================
-
-# If running a Debug/Coverage pass, use an OBJECT library so object files
-# are directly visible to lcov and baked straight into the test target.
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_library(seapath_lib OBJECT
-        calculations.cpp 
-        geodesy.cpp 
-        units.cpp
-    )
-    # Explicitly force coverage generation flags straight onto the object compilation units
-    target_compile_options(seapath_lib PRIVATE --coverage)
-    target_link_options(seapath_lib PUBLIC --coverage)
-else()
-    # Production/Release builds preserve your exact shared runtime targets
-    add_library(seapath_lib SHARED 
-        calculations.cpp 
-        geodesy.cpp 
-        units.cpp
-    )
-endif()
+add_library(seapath_lib SHARED 
+    calculations.cpp 
+    geodesy.cpp 
+    units.cpp
+)
 
 # Set up include paths so consumers can find public headers
 target_include_directories(seapath_lib PUBLIC 
@@ -45,12 +30,18 @@ target_link_libraries(seapath_rt_node PRIVATE
     Threads::Threads
 )
 
-# If in Debug coverage mode, make sure the final execution node pulls the coverage link symbols
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_options(seapath_rt_node PRIVATE --coverage)
-endif()
-
 # Ensure the executable can locate the executive header files cleanly
 target_include_directories(seapath_rt_node PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )
+
+# =================================================================
+# 3. Explicit Instrumentation Gate (Forced Globally)
+# =================================================================
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(seapath_lib PRIVATE --coverage)
+    target_link_options(seapath_lib PUBLIC --coverage)
+    
+    target_compile_options(seapath_rt_node PRIVATE --coverage)
+    target_link_options(seapath_rt_node PRIVATE --coverage)
+endif()

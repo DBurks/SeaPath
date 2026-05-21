@@ -42,24 +42,30 @@ jobs:
       - name: Build
         run: cd build && cmake --build . --config ${{ matrix.build_type }}
 
-      # Changed: Run from 'build' root directory so ctest resolves paths correctly across OS platforms
+      # Run Tests: Uses native binary for Ubuntu Debug to drop data, preserves ctest for macOS/Release
       - name: Run Tests
         run: |
           cd build
-          ctest --output-on-failure -C ${{ matrix.build_type }}
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ] && [ "${{ matrix.build_type }}" = "Debug" ]; then
+            ./tests/seapath_tests
+          else
+            ctest --output-on-failure -C ${{ matrix.build_type }}
+          fi
 
-      # Process and extract lcov metrics safely, ignoring GTest macro quirks
+      # Process and extract lcov metrics safely from within the build directory
       - name: Generate and Filter Coverage Report (Ubuntu Debug only)
         if: matrix.os == 'ubuntu-latest' && matrix.build_type == 'Debug'
         run: |
-          # Capture coverage directly by targeting the build directory and anchoring to workspace root
-          lcov --directory build/ --base-directory . --capture --output-file build/coverage.info --ignore-errors mismatch
+          cd build
           
-          # Filter out system and test files
-          lcov --remove build/coverage.info '/usr/*' '*/_deps/*' '*/tests/*' --output-file build/coverage.cleaned.info --ignore-errors mismatch
+          # 1. Capture data using the exact local directory layout
+          lcov --directory . --base-directory .. --capture --output-file coverage.info --ignore-errors mismatch,unused
           
-          # Generate the HTML dashboard
-          genhtml build/coverage.cleaned.info --output-directory build/coverage_report
+          # 2. Filter out system headers and unit tests cleanly
+          lcov --remove coverage.info '/usr/*' '*/_deps/*' '*/tests/*' --output-file coverage.cleaned.info --ignore-errors mismatch,unused
+          
+          # 3. Generate the static HTML report artifact matching your local workspace
+          genhtml coverage.cleaned.info --output-directory coverage_report
 
       # Zip and upload the HTML dashboard directly to your GitHub Action run panel
       - name: Upload Coverage Artifacts
