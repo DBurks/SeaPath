@@ -1,0 +1,9 @@
+[package]
+name = "Shipyard_GNC"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+mavlink = "0.12.2"
+tokio = { version = "1", features = ["full"] }
+zerocopy = { version = "0.7", features = ["derive"] } # Added for explicit type safety over the wire
