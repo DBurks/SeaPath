@@ -1,8 +1,8 @@
-mod network_types;
-mod kinematics; // Declare the new module
+mod kinematics;
+mod network_types; // Declare the new module
 
-use network_types::{TelemetryFrame, PackedWireParser};
 use kinematics::VesselKinematics;
+use network_types::{PackedWireParser, TelemetryFrame};
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};
 use tokio::net::UdpSocket;
@@ -12,15 +12,18 @@ use tokio::time::interval;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Shipyard_GNC Simulator Engine Online ===");
 
-    let local_addr: SocketAddr = "127.0.0.1:8081".parse()?;  
-    let target_addr: SocketAddr = "127.0.0.1:8080".parse()?; 
-    
+    let local_addr: SocketAddr = "127.0.0.1:8081".parse()?;
+    let target_addr: SocketAddr = "127.0.0.1:8080".parse()?;
+
     let socket = UdpSocket::bind(local_addr).await?;
-    println!("[NET] Connected to network line. Streaming to: {}", target_addr);
+    println!(
+        "[NET] Connected to network line. Streaming to: {}",
+        target_addr
+    );
 
     // Initialize our physical plant kinematics state
     let mut vessel = VesselKinematics::new(40.0, -105.0, 0.0);
-    
+
     // Track current actuator positions tracking back from C++ control driver
     let mut current_rudder_demand_deg = 0.0f32;
     let mut current_plane_demand_deg = 0.0f32;
@@ -28,10 +31,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let start_time = Instant::now();
     let dt = 0.020f32; // 20 milliseconds step
-    let mut frame_ticker = interval(Duration::from_millis(20)); 
-    let mut receive_buffer = [0u8; 128]; 
+    let mut frame_ticker = interval(Duration::from_millis(20));
+    let mut receive_buffer = [0u8; 128];
 
-loop {
+    loop {
         frame_ticker.tick().await;
         seq += 1;
 
@@ -44,13 +47,13 @@ loop {
             sequence_number: seq,
             latitude_deg: vessel.latitude_deg,
             longitude_deg: vessel.longitude_deg,
-            current_depth_m: 15.0,     
+            current_depth_m: 15.0,
             heading_rad: vessel.heading_rad,
             speed_knots: vessel.surge_knots,
-            target_depth_m: 0.0,      
-            target_heading_rad: 0.0,  
-            stern_plane_deg: current_plane_demand_deg,     
-            rudder_deg: current_rudder_demand_deg,          
+            target_depth_m: 0.0,
+            target_heading_rad: 0.0,
+            stern_plane_deg: current_plane_demand_deg,
+            rudder_deg: current_rudder_demand_deg,
         };
 
         let outbound_bytes = PackedWireParser::pack(&telemetry);

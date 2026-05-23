@@ -3,10 +3,10 @@ pub struct VesselKinematics {
     pub latitude_deg: f64,
     pub longitude_deg: f64,
     pub heading_rad: f32,
-    
+
     // Body-Fixed Velocities
-    pub surge_knots: f32, // Forward velocity (u)
-    pub sway_knots: f32,  // Lateral velocity (v)
+    pub surge_knots: f32,   // Forward velocity (u)
+    pub sway_knots: f32,    // Lateral velocity (v)
     pub yaw_rate_rads: f32, // Angular velocity (r)
 
     // Constants for coordinate conversion (meters per degree approximately)
@@ -25,7 +25,7 @@ impl VesselKinematics {
             yaw_rate_rads: 0.0,
             // Approximations centered around mid-latitudes
             lat_meters_per_deg: 111132.0,
-            lon_meters_per_deg: 85000.0, 
+            lon_meters_per_deg: 85000.0,
         }
     }
 
@@ -34,9 +34,9 @@ impl VesselKinematics {
         // 1. SIMPLE ACTUATOR MODEL: Rudder angle directly induces a proportional yaw rate
         // (We will add true hydrodynamic coefficients and momentum next, but this hooks up the loop)
         let rudder_rad = rudder_deg.to_radians();
-        
+
         // Let's assume a basic steering gain where rudder induces an angular velocity change
-        self.yaw_rate_rads = -0.05 * rudder_rad; 
+        self.yaw_rate_rads = -0.05 * rudder_rad;
 
         // 2. COORDINATE TRANSFORMATION (Body Frame -> Earth Frame)
         // Convert speed from knots to meters per second (1 knot = 0.514444 m/s)
@@ -54,11 +54,11 @@ impl VesselKinematics {
         // 3. EULER INTEGRATION
         let delta_x = x_dot * dt;
         let delta_y = y_dot * dt;
-        
+
         // Update Geodetic Coordinates
         self.latitude_deg += (delta_x as f64) / self.lat_meters_per_deg;
         self.longitude_deg += (delta_y as f64) / self.lon_meters_per_deg;
-        
+
         // Update Heading and wrap to [0, 2*PI]
         self.heading_rad += psi_dot * dt;
         if self.heading_rad < 0.0 {
