@@ -25,7 +25,7 @@ target_include_directories(seapath_tests PRIVATE
 # LINKER FIX: Match target in src/
 target_link_libraries(seapath_tests PRIVATE
     seapath_lib
-    GTest::gtest_main)
+    gtest_main)
 
 enable_testing()
 
