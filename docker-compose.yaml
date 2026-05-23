@@ -1,0 +1,44 @@
+services:
+  architect:
+    build: .
+    container_name: architect
+    user: "${UID:-1000}:1000"  # Runs as YOUR user
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+
+  coder:
+    build: .
+    container_name: coder
+    user: "${UID:-1000}:1000"  # Runs as YOUR user
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+
+  qa_analyst:
+    build: .
+    container_name: qa_analyst
+    user: "${UID:-1000}:1000"  # Runs as YOUR user
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+
+  tech_writer:
+    build: .
+    container_name: tech_writer
+    user: "${UID:-1000}:1000"  # Runs as YOUR user
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
