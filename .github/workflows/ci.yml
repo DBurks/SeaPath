@@ -10,6 +10,9 @@ jobs:
   build-rust-sim:
     name: Build Rust Simulator
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: seapath_sim
     steps:
       - name: Checkout Source Tree
         uses: actions/checkout@v4
@@ -25,16 +28,16 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            seapath_sim/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('seapath_sim/**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
       - name: Run Simulator Test Suite
-        run: cargo test --workspace --verbose
+        run: cargo test --verbose
 
       - name: Build Simulator Binary
-        run: cargo build --workspace --release
+        run: cargo build --release
 
   build-cpp-core:
     name: build-cpp-core (${{ matrix.os }}, ${{ matrix.build_type }})
