@@ -26,6 +26,7 @@ seapath_sim/target/
 .env
 seapath_source.tar.gz
 *.log
+.gvenv
 
 # ==========================================
 # IDE & System Pollutants (Keep it minimal)
